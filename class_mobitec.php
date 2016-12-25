@@ -3,6 +3,7 @@
 class mobitec
 {
 	public $error;
+	public $debug;
 	//Parse data
 	function parse($data,$show_output=false)
 	{
@@ -14,16 +15,20 @@ class mobitec
 			return false;
 		}
 		$fields=array(0xFF=>'Address',0xD0=>'Width',0xD1=>'Height',0xD2=>'Horizontal offset',0xD3=>'Vertical offset',0xD4=>'Font'); //Field definitions
-
-		foreach($signs[0] as $signkey=>$sign)
+		$signkey=0;
+		foreach($signs[0] as $sign)
 		{
+			unset($checksum);
+			$sign_pos=strpos($data,$sign); //Position in file for start byte (0xFF) of current sign
 			if($sign==chr(0xFF).chr(0x01).chr(0xFF)) //ICU transmits 0xFF 0x01 0xFF continiously when not changing
 				continue;
 			if(substr($sign,0,1)!=chr(0xFF) || substr($sign,2,1)!=chr(0xA2)) //Valid messages starts with 0xFF, then the sign address and then 0xA2
 			{
-				echo sprintf("Invalid sign, first byte is %s, third is %s\n",dechex(ord($sign[0])),dechex(ord($sign[2])));
+				if($this->debug)
+					echo sprintf("Invalid sign, first byte is %s, third is %s\n",dechex(ord($sign[0])),dechex(ord($sign[2])));
 				continue;
 			}
+	
 			if($show_output)
 				echo "----\n\n";
 			$message='';
@@ -31,6 +36,7 @@ class mobitec
 			for($i=0; $i<strlen($sign)-2; $i++) //Loop through the bytes, omitting the last 0xFF
 			{
 				$byte=ord($sign[$i]); //Get the ASCII code
+				$nextbyte=ord($sign[$i+1]); //Get the ASCII code
 				if($byte==0xA2)
 					continue;
 	
@@ -41,6 +47,16 @@ class mobitec
 					$lines[$signkey][$linekey][$fields[$byte]]=ord($sign[$i+1]);
 					$last_printable=false;
 					$i++;
+				}
+				elseif($byte==0xFE) //Escaped checksum
+				{
+					$message_end=$i-1; //Message ends at previous byte
+					if($nextbyte==0x00)
+						$checksum=0xFE;
+					if($nextbyte==0x01)
+						$checksum=0xFF;
+					$checksum_length=2;
+					break;
 				}
 				else //ASCII
 				{
@@ -65,25 +81,38 @@ class mobitec
 					
 					$last_printable=true;
 				}
-	
 			}
 			$message_start=strpos($sign,chr(0xD4))+2; //Message starts two bytes after 0xD4
+			if(substr($sign,-2,1)!=chr(0xFE)) //Non escaped checksum
+			{
+				$checksum_pos=$sign_pos+strlen($sign)-1-2;
+				$checksum=ord(substr($sign,-2,1));
+				$message_end=strlen($sign)-3;
+				$checksum_length=1;
+			}
+
 			if($show_output)
 			{
 				echo "Message: ".substr($sign,$message_start,strlen($sign)-$message_start-2)."\n";
 				echo "\nMessage: $message\n";
 				echo sprintf("Address: %s\n",ord(substr($sign,1,1)));
 			}
-			if(!isset($lines[$signkey][0]['Text']))
+			if(!isset($lines[$signkey][0]['Text'])) //No text, continue to next message without increasing key
+			{
 				unset($lines[$signkey]);
-
+				continue;
+			}
+			$checksum_real=$this->checksum($checksum_data=substr($sign,1,(-$checksum_length)-1),true); //Remove end byte and checksum (variable length) for new checksum calculation
+			if($checksum!=$checksum_real)
+				echo sprintf(_('Checksum for sign %s does not match, should be %s but is %s'),$signkey,dechex($checksum),dechex($checksum_real))."\n";
+			$signkey++;
 		}
 		if(empty($lines))
 		{
 			$this->error=_('No valid signs found');
 			return false;
 		}
-		return array_values($lines);
+		return $lines;
 	}
 
 	/*Write text at specified position with specified font
@@ -103,7 +132,7 @@ class mobitec
 		return $output;
 	}
 	//Calculate checksum
-	function checksum($output)
+	function checksum($output,$return_int=false)
 	{
 		/*if(substr($output,0,1)!=chr(0xFF) || substr($output,-1,1)!=chr(0xFF))
 			return false;*/
@@ -111,7 +140,8 @@ class mobitec
 		$numarray=array_map('ord',$stringarray); //Turn the array into numeric character code
 		$sum=array_sum($numarray); //Get the sum of the array
 		$checksum=$sum & 0xFF;
-		
+		if($return_int)
+			return $checksum;
 		if($checksum==0xFE)
 			$checksum=chr(0xFE).chr(0x00);
 		elseif($checksum==0XFF)
