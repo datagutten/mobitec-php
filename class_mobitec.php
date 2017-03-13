@@ -60,6 +60,11 @@ class mobitec
 				}
 				else //ASCII
 				{
+					if(!ctype_print($sign[$i])) //Valid signs does not contain non-printable characters
+					{
+						unset($lines[$signkey]);
+						continue;
+					}
 					if($show_output)
 					{
 						if($last_printable===false && (!ctype_print($sign[$i-1]) || !ctype_print($sign[$i-2])))
@@ -97,7 +102,7 @@ class mobitec
 				echo "\nMessage: $message\n";
 				echo sprintf("Address: %s\n",ord(substr($sign,1,1)));
 			}
-			if(!isset($lines[$signkey][0]['Text'])) //No text, continue to next message without increasing key
+			if(!isset($lines[$signkey][0]['Text']) || empty(trim($lines[$signkey][0]['Text']))) //No text, continue to next message without increasing key
 			{
 				unset($lines[$signkey]);
 				continue;
@@ -121,7 +126,8 @@ class mobitec
 	public function write_text($text,$x=false,$y=false,$font=false)
 	{
 		$output='';
-		$text=str_replace(array('å'),array(chr(0x7d)),$text);
+		$text=$this->special_chars_to_sign($text);
+
 		if($x!==false) //X position
 			$output.=chr(0xD2).chr($x);
 		if($y!==false) //Y position
@@ -190,5 +196,9 @@ class mobitec
 		$k1 = ord(substr($k, 0, 1)); 
 		$k2 = ord(substr($k, 1, 1)); 
 		return $k2 * 256 + $k1; 
+	}
+	function special_chars_to_sign($chars)
+	{
+		return str_replace(array('æ','ø','å','Æ','Ø','Å'),array('$',';','}','*',',',']'),$chars);
 	}
 }
