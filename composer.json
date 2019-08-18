@@ -12,5 +12,10 @@
     "require": {
         "ext-mbstring":  "*",
         "ext-ctype":  "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "datagutten\\mobitec\\": "src"
+        }
     }
 }
