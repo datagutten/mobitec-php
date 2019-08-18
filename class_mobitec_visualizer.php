@@ -60,7 +60,11 @@ class mobitec_visualizer extends mobitec
 					$rectangle=imagefilledrectangle($im,0,0,$line['Width']-1,$line['Height']-1,imagecolorallocate($im,0,0,255)); //Create a blue rectangle with the sign size
 				}
 				else
-					imagefill($im,0,0,imagecolorallocate($im,255,255,255)); //Fill with white
+				{
+					imagefill($im,0,0,$bg=imagecolorallocate($im,255,255,255)); //Fill with white
+					imagecolortransparent($im,$bg);
+				}
+					
 			}
 			if($this->debug) //Write a line at the text start position
 				imageline($im,$line['Horizontal offset'],$line['Vertical offset'],$line['Horizontal offset']+10,$line['Vertical offset'],imagecolorallocate($im,255,255,0));
@@ -107,6 +111,8 @@ class mobitec_visualizer extends mobitec
 		if(!is_resource($im))
 			return false;
 		$im_large=imagecreatetruecolor(imagesx($im)*$multiplier,imagesy($im)*$multiplier);
+		imagefill($im_large,0,0,$bg=imagecolorallocate($im_large,255,255,255)); //Fill with white
+		imagecolortransparent($im_large,$bg);
 		imagecopyresized($im_large,$im,0,0,0,0,imagesx($im)*$multiplier,imagesy($im)*$multiplier,imagesx($im),imagesy($im));
 		return $im_large;
 	}
