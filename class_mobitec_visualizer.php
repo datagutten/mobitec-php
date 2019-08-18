@@ -11,15 +11,9 @@ class mobitec_visualizer extends mobitec
 	function visualize($data, $debug=false)
 	{
 		if(!is_array($data))
-		{
-			throw new Exception('Data is not array');
-			return false;
-		}
+			throw new InvalidArgumentException('Data is not array');
 		if(!isset($data[0]['Text']))
-		{
-			$this->error='No text';
-			return false;
-		}
+			throw new InvalidArgumentException('No text');
 
 		foreach($data as $key=>$line) //Loop through the lines
 		{
