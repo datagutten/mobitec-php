@@ -4,16 +4,21 @@ class mobitec
 {
 	public $error;
 	public $debug;
-	//Parse data
+
+    /**
+     * Parse data
+     * @param $data
+     * @param bool $show_output Show debug output
+     * @return array
+     * @throws Exception
+     */
 	function parse($data,$show_output=false)
 	{
 		$matches=preg_match_all($pattern=sprintf('/%1$s.+?%1$s/s',chr(0xff)),$data,$signs); //Get all signs
 		//print_r($signs);
 		if($matches==0)
-		{
-			$this->error=_('No signs found');
-			return false;
-		}
+			throw new Exception('No signs found');
+
 		$fields=array(0xFF=>'Address',0xD0=>'Width',0xD1=>'Height',0xD2=>'Horizontal offset',0xD3=>'Vertical offset',0xD4=>'Font'); //Field definitions
 		$signkey=0;
 		foreach($signs[0] as $sign)
@@ -113,10 +118,8 @@ class mobitec
 			$signkey++;
 		}
 		if(empty($lines))
-		{
-			$this->error=_('No valid signs found');
-			return false;
-		}
+            throw new Exception('No valid signs found');
+
 		return $lines;
 	}
 
