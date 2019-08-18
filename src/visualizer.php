@@ -1,14 +1,32 @@
 <?Php
-require_once 'class_mobitec.php';
-class mobitec_visualizer extends mobitec
+
+
+namespace datagutten\mobitec;
+
+
+use Exception;
+use InvalidArgumentException;
+
+class visualizer
 {
+    /**
+     * visualizer constructor.
+     * @throws Exception
+     */
 	function __construct()
 	{
 		if(!function_exists('imagecreatetruecolor'))
 			throw new Exception('GD library is required for visualization, but is not installed');
 	}
-	//Create a GD image of the data
-	function visualize($data, $debug=false)
+
+    /**
+     * Create a GD image of the data
+     * @param $data
+     * @param bool $debug
+     * @return resource
+     * @throws Exception
+     */
+	public static function visualize($data, $debug=false)
 	{
 		if(!is_array($data))
 			throw new InvalidArgumentException('Data is not array');
@@ -48,11 +66,11 @@ class mobitec_visualizer extends mobitec
 					$im=imagecreatetruecolor($line['Width'],$line['Height']);
 				else
 					$im=imagecreatetruecolor(120,20); //Create with default size
-				if($this->debug)
+				if($debug)
 				{
 					$im=imagecreatetruecolor(130,30); //Create extra large
 					imagefill($im,0,0,imagecolorallocate($im,255,0,255)); //Fill with purple outside the sign
-					$rectangle=imagefilledrectangle($im,0,0,$line['Width']-1,$line['Height']-1,imagecolorallocate($im,0,0,255)); //Create a blue rectangle with the sign size
+					//$rectangle=imagefilledrectangle($im,0,0,$line['Width']-1,$line['Height']-1,imagecolorallocate($im,0,0,255)); //Create a blue rectangle with the sign size
 				}
 				else
 				{
@@ -61,15 +79,15 @@ class mobitec_visualizer extends mobitec
 				}
 					
 			}
-			if($this->debug) //Write a line at the text start position
+			if($debug) //Write a line at the text start position
 				imageline($im,$line['Horizontal offset'],$line['Vertical offset'],$line['Horizontal offset']+10,$line['Vertical offset'],imagecolorallocate($im,255,255,0));
 				$pos=$line['Horizontal offset']; //Position for first character
 			for($i=0; $i<mb_strlen($line['Text']); $i++) //Loop through the characters
 			{
 				$char=mb_substr($line['Text'],$i,1);
 				$charcode=utils::uniord($char);
-				$charfile=sprintf('fonts/font_%s/%s.png',$line['Font'],$charcode); //Combine the font id and the ASCII code of the character
-				if(!file_exists(sprintf('fonts/font_%s',$line['Font'])))
+                $charfile=sprintf(__DIR__.'/../fonts/font_%s/%s.png',$line['Font'],$charcode); //Combine the font id and the ASCII code of the character
+                if(!file_exists(sprintf(__DIR__.'/../fonts/font_%s',$line['Font'])))
 				{
 					if($debug)
 						echo sprintf("Missing font %s\n",$line['Font']);
@@ -100,9 +118,11 @@ class mobitec_visualizer extends mobitec
 					echo sprintf('Missing image for character %s in font %s, Hex: %s Dec: %s Pos: %s',$char,$line['Font'],dechex($charcode),$charcode,$i)."\n";
 			}
 		}
+		if(!isset($im))
+		    throw new Exception('Image creation failed');
 		return $im;
 	}
-	function enlarge($im,$multiplier=10) //Enlarge a visualized sign
+	public static function enlarge($im,$multiplier=10) //Enlarge a visualized sign
 	{
 		if(!is_resource($im))
 			return false;
