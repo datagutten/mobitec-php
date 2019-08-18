@@ -108,7 +108,7 @@ class mobitec
 				continue;
 			}
 			$checksum_real=$this->checksum($checksum_data=substr($sign,1,(-$checksum_length)-1),true); //Remove end byte and checksum (variable length) for new checksum calculation
-			if($checksum!=$checksum_real)
+			if($checksum!=$checksum_real && $show_output)
 				echo sprintf(_('Checksum for sign %s does not match, should be %s but is %s'),$signkey,dechex($checksum),dechex($checksum_real))."\n";
 			$signkey++;
 		}
