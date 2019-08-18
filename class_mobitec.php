@@ -123,24 +123,36 @@ class mobitec
 		return $lines;
 	}
 
-	/*Write text at specified position with specified font
-	If parameteres are not specified the parameters from the previous text are re-used
-	*/
-	public function write_text($text,$x=false,$y=false,$font=false)
+    /**
+     * Write text at specified position with specified font
+     * If parameteres are not specified the parameters from the previous text are re-used
+     * @param $text
+     * @param int $x X position
+     * @param int $y Y position
+     * @param int $font Font
+     * @return string String to be written
+     */
+	public function write_text($text,$x=null,$y=null,$font=null)
 	{
 		$output='';
 		$text=$this->special_chars_to_sign($text);
 
-		if($x!==false) //X position
+		if(!empty($x)) //X position
 			$output.=chr(0xD2).chr($x);
-		if($y!==false) //Y position
+		if(!empty($y)) //Y position
 			$output.=chr(0xD3).chr($y);
-		if($font!==false) //Font
+		if(!empty($font)) //Font
 			$output.=chr(0xD4).chr($font);
 		$output.=$text;
 		return $output;
 	}
-	//Calculate checksum
+
+    /**
+     * Calculate checksum
+     * @param $output
+     * @param bool $return_int
+     * @return int|string
+     */
 	function checksum($output,$return_int=false)
 	{
 		/*if(substr($output,0,1)!=chr(0xFF) || substr($output,-1,1)!=chr(0xFF))
@@ -160,7 +172,15 @@ class mobitec
 
 		return $checksum;
 	}
-	//Add header and checksum to data to make it ready to send to sign
+
+    /**
+     * Add header and checksum to data to make it ready to send to sign
+     * @param $data
+     * @param int $address
+     * @param $width
+     * @param $height
+     * @return string
+     */
 	function output($data,$address=0x07,$width,$height)
 	{
 		//Add header
@@ -173,8 +193,13 @@ class mobitec
 		$output.=chr(0xFF); //And end byte
 		return $output;
 	}
-	
-	//Format a value for debugging
+
+    /**
+     * Format a value for debugging
+     * @param $string
+     * @param bool $return_as_hex
+     * @return float|int|string
+     */
 	function format_value($string,$return_as_hex=false) //Convert a string to character codes
 	{
 		$chars=str_split($string); //Split the string into an array
@@ -191,15 +216,25 @@ class mobitec
 			return $number_hex; //Return as hex string
 	}
 
-	/*Get the character code for a multi-byte character
-	Found at: http://php.net/manual/en/function.ord.php#42778
-	*/
+
+    /**
+     * Get the character code for a multi-byte character
+     * Found at: http://php.net/manual/en/function.ord.php#42778
+     * @param string $u
+     * @return int
+     */
 	function uniord($u) { 
 		$k = mb_convert_encoding($u, 'UCS-2LE', 'UTF-8'); 
 		$k1 = ord(substr($k, 0, 1)); 
 		$k2 = ord(substr($k, 1, 1)); 
 		return $k2 * 256 + $k1; 
 	}
+
+    /**
+     * Convert special characters for use on the sign
+     * @param $chars
+     * @return mixed
+     */
 	function special_chars_to_sign($chars)
 	{
 		return str_replace(array('æ','ø','å','Æ','Ø','Å'),array('$',';','}','*',',',']'),$chars);
