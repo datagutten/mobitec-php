@@ -1,0 +1,16 @@
+{
+    "name": "datagutten/mobitec",
+    "description": "Tools to parse and output data for Mobitec signs",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "datagutten",
+            "email": "datagutten@datagutten.net"
+        }
+    ],
+    "require": {
+        "ext-mbstring":  "*",
+        "ext-ctype":  "*"
+    }
+}
