@@ -67,7 +67,7 @@ class mobitec_visualizer extends mobitec
 			for($i=0; $i<mb_strlen($line['Text']); $i++) //Loop through the characters
 			{
 				$char=mb_substr($line['Text'],$i,1);
-				$charcode=$this->uniord($char);
+				$charcode=utils::uniord($char);
 				$charfile=sprintf('fonts/font_%s/%s.png',$line['Font'],$charcode); //Combine the font id and the ASCII code of the character
 				if(!file_exists(sprintf('fonts/font_%s',$line['Font'])))
 				{
