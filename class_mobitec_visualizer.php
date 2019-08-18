@@ -8,7 +8,7 @@ class mobitec_visualizer extends mobitec
 			throw new Exception('GD library is required for visualization, but is not installed');
 	}
 	//Create a GD image of the data
-	function visualize($data)
+	function visualize($data, $debug=false)
 	{
 		if(!is_array($data))
 		{
@@ -28,7 +28,8 @@ class mobitec_visualizer extends mobitec
 
 			if(!isset($line['Font']))
 			{
-				echo sprintf("No font defined for line %s, defaulting to Mobitec Std h 16x9 15\n",$key+1);
+				if($debug)
+					echo sprintf("No font defined for line %s, defaulting to Mobitec Std h 16x9 15\n",$key+1);
 				$line['Font']=104;
 			}
 			//If offset not defined, use offset from previous line
@@ -76,7 +77,8 @@ class mobitec_visualizer extends mobitec
 				$charfile=sprintf('fonts/font_%s/%s.png',$line['Font'],$charcode); //Combine the font id and the ASCII code of the character
 				if(!file_exists(sprintf('fonts/font_%s',$line['Font'])))
 				{
-					echo sprintf("Missing font %s\n",$line['Font']);
+					if($debug)
+						echo sprintf("Missing font %s\n",$line['Font']);
 					break;
 				}
 				if(file_exists($charfile))
@@ -100,7 +102,7 @@ class mobitec_visualizer extends mobitec
 					imagecopy($im,$im_char,$pos,$line['Vertical offset']-$font_height+1,0,0,$char_width,imagesy($im_char));
 					$pos=$pos+$char_width; //Next position is current posision plus current character width
 				}
-				else
+				elseif($debug)
 					echo sprintf('Missing image for character %s in font %s, Hex: %s Dec: %s Pos: %s',$char,$line['Font'],dechex($charcode),$charcode,$i)."\n";
 			}
 		}
