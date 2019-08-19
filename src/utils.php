@@ -68,4 +68,22 @@ class utils
 
         return $checksum;
     }
+
+    public static function is_printable($byte_or_char)
+    {
+        if(is_int($byte_or_char))
+        {
+            $byte = $byte_or_char;
+            $char = chr($byte);
+        }
+        else
+        {
+            $byte = ord($byte_or_char);
+            $char = $byte_or_char;
+        }
+        if (!ctype_print($char) || ($byte<32 || $byte>126)) //Valid signs does not contain non-printable characters
+            return false;
+        else
+            return true;
+    }
 }
