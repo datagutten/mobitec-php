@@ -19,7 +19,7 @@ class decoder
      */
     public static function parse($data, $show_output = false)
     {
-        $matches = preg_match_all($pattern = sprintf('/%1$s.+?%1$s/s', chr(0xff)), $data, $signs); //Get all signs
+        $matches = preg_match_all('/\xff.+?\xff/s', $data, $signs); //Get all signs
         //print_r($signs);
         if ($matches == 0)
             throw new Exception('No signs found');
