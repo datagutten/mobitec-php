@@ -106,7 +106,9 @@ class decoder
                 echo "\nMessage: $message\n";
                 echo sprintf("Address: %s\n", ord(substr($sign, 1, 1)));
             }
-            if (!isset($lines[$signkey][0]['Text']) || empty(trim($lines[$signkey][0]['Text']))) //No text, continue to next message without increasing key
+
+            //First message must have text and address to be valid, continue to next message without increasing key
+            if (!isset($lines[$signkey][0]['Text']) || empty(trim($lines[$signkey][0]['Text'])) || empty($lines[$signkey][0]['Address']))
             {
                 unset($lines[$signkey]);
                 continue;
