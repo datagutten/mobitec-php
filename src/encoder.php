@@ -16,12 +16,15 @@ class encoder
      * @param int $x X position
      * @param int $y Y position
      * @param int $font Font
+     * @param bool $debug Show debug output
      * @return string String to be written
      */
-    public static function write_text($text, $x = null, $y = null, $font = null)
+    public static function write_text($text, $x = null, $y = null, $font = null, $debug = false)
     {
         $output = '';
         $text = self::special_chars_to_sign($text);
+        if($debug)
+            printf("Write %s at X %d Y %d with font %d\n", $text, $x, $y, $font);
 
         if (!empty($x)) //X position
             $output .= chr(0xD2) . chr($x);
