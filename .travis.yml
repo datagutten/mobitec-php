@@ -32,6 +32,3 @@ before_script:
 
 script:
  - vendor/bin/phpunit
-
-after_script:
-  - bash <(curl -s https://codecov.io/bash)
